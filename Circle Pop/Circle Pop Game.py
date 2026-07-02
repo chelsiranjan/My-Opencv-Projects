@@ -2,6 +2,7 @@ import cv2
 import random
 import mediapipe as mp
 import time
+import math
 
 frameWidth = 1200
 frameHeight = 900
@@ -26,7 +27,7 @@ for i in range(8):
         'x': random.randint(50, frameWidth-50),
         'y': random.randint(480, frameHeight-50),
         'r': random.randint(30 ,35),
-        'speed': random.randint(3, 7),
+        'speed': random.randint(5, 7),
         'color': (random.randint(50,255),
                   random.randint(50,255),
                   random.randint(50,255))})
@@ -52,10 +53,10 @@ while True:
             circle['y'] = frameHeight + circle['r']
             circle['x'] = random.randint(50, frameWidth - 50)
             circle['r'] = random.randint(30, 35)
-            circle['speed'] = random.randint(3, 7)
+            circle['speed'] = random.randint(5, 7)
             circle['color'] = (random.randint(50,255),
-                  random.randint(50,255),
-                  random.randint(50,255))
+                               random.randint(50,255),
+                               random.randint(50,255))
 
 
         cv2.circle(img,(circle['x'], circle['y']),circle['r'],circle['color'],-1)
@@ -68,12 +69,32 @@ while True:
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
                 
-                mp_draw.draw_landmarks(img,hand_landmarks,mp_hands.HAND_CONNECTIONS)
+                mp_draw.draw_landmarks(img, hand_landmarks, mp_hands.HAND_CONNECTIONS)
                 h, w, i = img.shape
                 index_tip = hand_landmarks.landmark[8]
                 index_x = int(index_tip.x * w)
                 index_y = int(index_tip.y * h)
                 cv2.circle(img, (index_x, index_y), 10, (0, 255, 255), -1)
+
+
+
+            if index_x is not None and index_y is not None:
+
+                # distance formula btw circle radius and finger
+
+                distance = math.sqrt((index_x-circle['x'])**2 + (index_y-circle['y'])**2)
+                
+                if distance < circle['r']:
+                    score = score + 1
+
+                    circle['x'] = random.randint(50, frameWidth-50)
+                    circle['y'] = frameHeight + circle['r']
+                    circle['r'] = random.randint(30, 35)
+                    circle['speed'] = random.randint(5, 7)
+                    circle['color'] = (random.randint(50,255), 
+                                       random.randint(50,255), 
+                                       random.randint(50,255))
+    
 
 
 
@@ -100,8 +121,8 @@ while True:
 cap.release()
 cv2.destroyAllWindows()
 
-# 4  Thumb tip
-# 8  Index finger tip
-# 12  Middle finger tip
-# 16  Ring finger tip
-# 20  Pinky tip
+# 4  thumb tip
+# 8  index finger tip
+# 12  middle finger tip
+# 16  ring finger tip
+# 20  pinky tip
